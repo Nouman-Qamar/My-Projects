@@ -1,0 +1,1146 @@
+#include <iostream>
+#include <string>
+#include <vector>
+#include <cstdlib>
+#include <ctime>
+#include <fstream>
+#include <iomanip>
+#include <SFML/Graphics.hpp>
+#include <windows.h>
+
+using namespace std;
+using namespace sf;
+
+class Game {
+public:
+    Game() {}
+    friend void displayInstructions(const string& filePath);
+    virtual bool play_or_not();
+};
+
+bool Game::play_or_not() {
+    string yes_no;
+    cout << "DO YOU WANT TO PLAY AGAIN(yes/no): ";
+    cin >> yes_no;
+    while (!(yes_no == "yes" || yes_no == "YES" || yes_no == "no" || yes_no == "NO")) {
+        cout << "    - Enter again -         " << endl;
+        cout << "DO YOU WANT TO PLAY AGAIN(yes/no): ";
+        cin >> yes_no;
+    }
+    system("cls");
+    return (yes_no == "yes" || yes_no == "YES");
+}
+
+void displayInstructions(const string& filePath) {
+    system("color A");
+    ifstream instrFile(filePath);
+    string instruction;
+    if (!instrFile.is_open()) {
+        cout << "Unable to open file: " << filePath << endl;
+        return;
+    }
+
+    cout << "Instructions:" << endl;
+    while (getline(instrFile, instruction)) {
+        cout << instruction << endl;
+    }
+
+    instrFile.close();
+}
+
+class Quiz : public Game {
+    string question;
+    string options[4];
+    char correctAnswer;
+    static int currentQuestionIndex; // Keeps track of the current question index
+    static int Q_No;
+    static int Correct;
+    static int Wrong;
+
+public:
+    Quiz() {}
+
+    // Parameterized constructor
+    Quiz(const string& q, const string opt[4], char ans)
+    {
+        question = q;
+        correctAnswer = ans;
+        for (int i = 0; i < 4; ++i)
+        {
+            options[i] = opt[i];
+        }
+    }
+
+    void displayQuestion(const string& playerName)
+    {
+        cout << playerName << " - Q" << Q_No << ": " << question << endl;
+        for (int i = 0; i < 4; ++i)
+        {
+            cout << static_cast<char>('A' + i) << ") " << options[i] << endl;
+
+        }
+    }
+
+    char getCorrectAnswer() const {
+        return correctAnswer;
+    }
+
+    static void resetCurrentQuestionIndex() {
+        currentQuestionIndex = 0;
+        Q_No = 1;
+        Correct = 0;
+        Wrong = 0;
+    }
+
+    static void incrementCurrentQuestionIndex() {
+        currentQuestionIndex++;
+        Q_No++;
+    }
+
+    static void incrementCorrect() {
+        Correct++;
+    }
+
+    static void incrementWrong() {
+        Wrong++;
+    }
+
+    static int getCorrectCount() {
+        return Correct;
+    }
+
+    static int getWrongCount() {
+        return Wrong;
+    }
+
+    static int display(const string& playerName);
+    static void result();
+};
+
+int Quiz::currentQuestionIndex = 0;
+int Quiz::Q_No = 1;
+int Quiz::Correct = 0;
+int Quiz::Wrong = 0;
+
+int Quiz::display(const string& playerName) {
+    if (currentQuestionIndex >= 10) {
+        cout << "All questions have been asked!" << endl;
+        return 0;
+    }
+
+    cout << playerName << "'s turn" << endl;
+    cout << "Question No: " << Q_No << "\t\tCorrect Answer: " << Correct << "\t\tWrong Answer: " << Wrong << endl;
+
+    const string questionText[10] = {
+        "What is the capital of France?", "Which planet is known as the Red Planet?", "Who wrote the play Romeo and Juliet?",
+        "What is the chemical symbol for water?", "What is the tallest mammal in the world?", "Which country is known as the Land of the Rising Sun?",
+        "Who painted the Mona Lisa?", "What is the currency of Japan?", "What is the tallest mountain in the world?",
+        "Who was the first man to walk on the moon?"
+    };
+
+    const string optionsText[10][4] = {
+        {"Paris", "London", "Berlin", "Rome"}, {"Venus", "Mars", "Jupiter", "Saturn"},
+        {"William Shakespeare", "Charles Dickens", "Jane Austen", "Mark Twain"},
+        {"H2O", "CO2", "O2", "NaCl"}, {"Elephant", "Giraffe", "Hippopotamus", "Rhinoceros"},
+        {"China", "Japan", "India", "South Korea"}, {"Vincent van Gogh", "Pablo Picasso", "Leonardo da Vinci", "Michelangelo"},
+        {"Yen", "Euro", "Dollar", "Pound"}, {"Mount Kilimanjaro", "Mount Everest", "Mount Fuji", "Mount McKinley"},
+        {"Neil Armstrong", "Buzz Aldrin", "Yuri Gagarin", "John Glenn"}
+    };
+
+    const char correctAnswers[10] = {
+        'A', 'B', 'A', 'A', 'B', 'B', 'C', 'A', 'B', 'A'
+    };
+
+    Quiz currentQuestion(questionText[currentQuestionIndex], optionsText[currentQuestionIndex], correctAnswers[currentQuestionIndex]);
+    currentQuestion.displayQuestion(playerName);
+
+    char userChoice;
+    cout << endl;
+    cout << "Your Answer (A, B, C, D): ";
+    cin >> userChoice;
+
+    // Normalize user input to uppercase manually
+    if (userChoice >= 'a' && userChoice <= 'd') {
+        userChoice -= 32; // Convert lowercase to uppercase
+    }
+
+    while (userChoice < 'A' || userChoice > 'D') {
+        cout << "Invalid Choice! Please Enter Again: ";
+        cin >> userChoice;
+
+        if (userChoice >= 'a' && userChoice <= 'd') {
+            userChoice -= 32; // Convert lowercase to uppercase
+        }
+    }
+
+    if (userChoice == correctAnswers[currentQuestionIndex]) {
+        incrementCorrect();
+        cout << "Correct!" << endl;
+    }
+    else {
+        incrementWrong();
+        cout << "Wrong! The correct answer was " << correctAnswers[currentQuestionIndex] << "." << endl;
+    }
+
+    incrementCurrentQuestionIndex();
+    return Q_No;
+}
+
+void Quiz::result() {
+    cout << "Correct Answers: " << Correct << endl;
+    cout << "Wrong Answers: " << Wrong << endl;
+}
+
+
+
+
+class Hangman : public Game
+{
+    friend void displayInstructions(const string& filePath);
+    string word_to_be_guessed;
+    int Max_attempts, attempts_left, wrongAttempts, points;
+    string guessedWord; // To keep track of correctly guessed letters
+
+public:
+    char user_guess;
+
+    Hangman()
+    {
+        Max_attempts = 6;
+        attempts_left = Max_attempts;
+        points = 0;
+        wrongAttempts = 0;
+        srand(time(0));
+    }
+
+    void GuessWord()
+    {
+        string words[30] = { "ampilfy", "understand",  "crocodile",  "computer",  "cupboard",  "compiler",  "flower", "flour",  "algorithm",  "twist",  "laptop",  "browser",  "python", "ruby",  "programming",  "spectacles",  "elephant",  "sunshine",  "chocolate",  "butterfly",  "mountain",  "fireworks",  "pancakes",  "guitar",  "adventure",  "watermelon",  "rainbow",  "snowflake",  "library",  "pineapple" };
+        int random = rand() % 30;
+        word_to_be_guessed = words[random];
+        guessedWord = string(word_to_be_guessed.length(), '_'); // Initialize guessedWord with underscores
+    }
+
+    void Display()
+    {
+        cout << "Hidden Word: ";
+        for (int i = 0; i < guessedWord.length(); i++)
+        {
+            cout << guessedWord[i] << " ";
+        }
+        cout << endl;
+    }
+
+    bool UserGuess()
+    {
+        bool guessedCorrectly = false;
+        for (int i = 0; i < word_to_be_guessed.length(); i++)
+        {
+            if (user_guess == word_to_be_guessed[i]) // Case sensitive comparison
+            {
+                guessedCorrectly = true;
+                guessedWord[i] = word_to_be_guessed[i]; // Update guessedWord with correct guess
+                points += 10;
+            }
+        }
+        if (!guessedCorrectly) // Increment wrongAttempts if guess is incorrect
+            wrongAttempts++;
+        return guessedCorrectly;
+    }
+
+    bool Is_Game_Over()
+    {
+        return attempts_left == 0 || wrongAttempts == Max_attempts || guessedWord == word_to_be_guessed;
+    }
+
+    void DrawHangman()
+    {
+        switch (wrongAttempts)
+        {
+        case 1:
+            cout << setw(30) << "  O  " << endl;
+            break;
+        case 2:
+            cout << setw(30) << "  O  " << endl;
+            cout << setw(30) << "  |  " << endl;
+            break;
+        case 3:
+            cout << setw(30) << "  O  " << endl;
+            cout << setw(30) << " /|  " << endl;
+            break;
+        case 4:
+            cout << setw(30) << "  O  " << endl;
+            cout << setw(30) << " /|\\ " << endl;
+            break;
+        case 5:
+            cout << setw(30) << "  O  " << endl;
+            cout << setw(30) << " /|\\ " << endl;
+            cout << setw(30) << " /   " << endl;
+            break;
+        case 6:
+            cout << setw(30) << "  O  " << endl;
+            cout << setw(30) << " /|\\ " << endl;
+            cout << setw(30) << " / \\ " << endl;
+            break;
+        }
+    }
+
+    void Attempts()
+    {
+        DrawHangman();
+        attempts_left--;
+        cout << " Attempts Left = " << attempts_left << endl;
+    }
+
+    int GetPoints()
+    {
+        return points;
+    }
+
+    void play()
+    {
+        Hangman game;
+        game.GuessWord();
+
+        while (!game.Is_Game_Over())
+        {
+            game.Display();
+            cout << "Enter your guess: ";
+            cin >> game.user_guess;
+            bool guessedCorrectly = game.UserGuess();
+            if (!guessedCorrectly)
+            {
+                game.Attempts();
+            }
+            else
+            {
+                cout << "Correct guess!" << endl;
+            }
+        }
+
+        if (game.guessedWord == game.word_to_be_guessed)
+        {
+            cout << "Congratulations! You've guessed the word: " << game.word_to_be_guessed << endl;
+        }
+        else
+        {
+            cout << "GAME OVER! The word was: " << game.word_to_be_guessed << endl;
+        }
+
+        cout << "Points: " << game.GetPoints() << endl;
+    }
+
+    bool play_or_not()
+    {
+        string yes_no;
+        cout << "DO YOU WANT TO PLAY AGAIN(yes/no): ";
+        cin >> yes_no;
+        while (!(yes_no == "yes" || yes_no == "YES" || yes_no == "no" || yes_no == "NO")) {
+            cout << "    - Enter again -         " << endl;
+            cout << "DO YOU WANT TO PLAY AGAIN(yes/no): ";
+            cin >> yes_no;
+        }
+        system("cls");
+        return (yes_no == "yes" || yes_no == "YES");
+    }
+
+};
+
+
+// Class definition for BrickBreaker game
+class BrickBreakerGame : public Game
+{
+    friend void displayInstructions(const string& filePath);
+public:
+    void runGame()
+    {
+        RenderWindow window(VideoMode(250, 200), "BrickBreaker");
+        window.setFramerateLimit(60); // Set a fixed frame rate
+
+        const int bricks = 30;
+        const int bricksPerRow = 10;
+        RectangleShape brick[bricks];
+
+        for (int i = 0; i < bricks; ++i)
+        {
+            brick[i].setSize(Vector2f(20, 10));
+            brick[i].setFillColor(Color::Yellow);
+            brick[i].setPosition(2 + (i % bricksPerRow) * 25, 20 + (i / bricksPerRow) * 15);
+        }
+
+        float paddleWidth = 55;
+        float paddleHeight = 10;
+        RectangleShape paddle(Vector2f(paddleWidth, paddleHeight));
+        paddle.setFillColor(Color::Red);
+
+        float windowWidth = window.getSize().x;
+        float windowHeight = window.getSize().y;
+        float xAxis = (windowWidth - paddleWidth) / 2;
+        float yAxis = windowHeight - paddleHeight;
+
+        paddle.setPosition(xAxis, yAxis);
+
+        float Ball_radius = 5.0;
+        CircleShape ball(Ball_radius);
+        ball.setFillColor(Color::Magenta);
+        ball.setPosition(windowWidth / 2, windowHeight / 2);
+
+        float ball_speedX = 2.0;
+        float ball_speedY = -2.0;
+        int points = 0;
+        while (window.isOpen())
+        {
+            Event event;
+            while (window.pollEvent(event))
+            {
+                if (event.type == Event::Closed)
+                {
+                    window.close();
+                }
+            }
+
+            float paddleSpeed = 4.0;
+
+            if (Keyboard::isKeyPressed(Keyboard::Right))
+            {
+                if (paddle.getPosition().x + paddleWidth < windowWidth)
+                {
+                    paddle.move(paddleSpeed, 0);
+                }
+            }
+
+            if (Keyboard::isKeyPressed(Keyboard::Left))
+            {
+                if (paddle.getPosition().x > 0)
+                {
+                    paddle.move(-paddleSpeed, 0);
+                }
+            }
+
+            ball.move(ball_speedX, ball_speedY);
+            if (ball.getPosition().x < 0 || ball.getPosition().x > windowWidth - Ball_radius * 2)
+            {
+                ball_speedX = -ball_speedX;
+            }
+
+            if (ball.getPosition().y < 0)
+            {
+                ball_speedY = -ball_speedY;
+            }
+
+            if (ball.getGlobalBounds().intersects(paddle.getGlobalBounds()))
+            {
+                ball_speedY = -ball_speedY;
+            }
+
+            // Collision with bricks
+            int remainingBricks = 0;
+            for (int i = 0; i < bricks; ++i)
+            {
+                if (brick[i].getPosition().x != -100) // Only count bricks that are still in the game
+                {
+                    remainingBricks++;
+                    if (brick[i].getGlobalBounds().intersects(ball.getGlobalBounds()))
+                    {
+                        brick[i].setPosition(-100, -100); // remove brick
+                        ball_speedY = -ball_speedY;
+                        ball_speedX = -ball_speedX; // Reverse ball horizontally
+                        points++; // increment points
+                        std::system("cls"); // clear console
+                        std::cout << "Points: " << points << std::endl; // print points
+                    }
+                }
+            }
+            if (ball.getPosition().y > windowHeight)
+            {
+                // Game over, close the window
+                window.close();
+            }
+
+            // Check if player has won (all bricks are removed)
+            if (remainingBricks == 0)
+            {
+                // Player won, close the window
+                window.close();
+            }
+
+
+            window.clear();
+
+            for (int i = 0; i < bricks; ++i)
+            {
+                window.draw(brick[i]);
+            }
+
+            window.draw(paddle);
+            window.draw(ball);
+            window.display();
+
+        }
+        window.close();
+
+
+    }
+
+    bool play_or_not()
+    {
+        string yes_no;
+        cout << "DO YOU WANT TO PLAY AGAIN(yes/no): ";
+        cin >> yes_no;
+        while (!(yes_no == "yes" || yes_no == "YES" || yes_no == "no" || yes_no == "NO")) {
+            cout << "    - Enter again -         " << endl;
+            cout << "DO YOU WANT TO PLAY AGAIN(yes/no): ";
+            cin >> yes_no;
+        }
+        system("cls");
+        return (yes_no == "yes" || yes_no == "YES");
+    }
+
+    void rungame1()
+    {
+        RenderWindow window(VideoMode(250, 200), "BrickBreaker");
+        window.setFramerateLimit(60); // Set a fixed frame rate
+
+        const int bricks = 30;
+        const int bricksPerRow = 10;
+        RectangleShape brick[bricks];
+
+        for (int i = 0; i < bricks; ++i)
+        {
+            brick[i].setSize(Vector2f(20, 10));
+            brick[i].setFillColor(Color::Yellow);
+            brick[i].setPosition(2 + (i % bricksPerRow) * 25, 20 + (i / bricksPerRow) * 15);
+        }
+
+        float paddleWidth = 55;
+        float paddleHeight = 10;
+        RectangleShape paddle(Vector2f(paddleWidth, paddleHeight));
+        paddle.setFillColor(Color::Red);
+
+        float windowWidth = window.getSize().x;
+        float windowHeight = window.getSize().y;
+        float xAxis = (windowWidth - paddleWidth) / 2;
+        float yAxis = windowHeight - paddleHeight;
+
+        paddle.setPosition(xAxis, yAxis);
+
+        float Ball_radius = 5.0;
+        CircleShape ball(Ball_radius);
+        ball.setFillColor(Color::Magenta);
+        ball.setPosition(windowWidth / 2, windowHeight / 2);
+
+        float ball_speedX = 3.0;
+        float ball_speedY = -3.0;
+        int points = 0;
+        while (window.isOpen())
+        {
+            Event event;
+            while (window.pollEvent(event))
+            {
+                if (event.type == Event::Closed)
+                {
+                    window.close();
+                }
+            }
+
+            float paddleSpeed = 4.5;
+
+            if (Keyboard::isKeyPressed(Keyboard::Right))
+            {
+                if (paddle.getPosition().x + paddleWidth < windowWidth)
+                {
+                    paddle.move(paddleSpeed, 0);
+                }
+            }
+
+            if (Keyboard::isKeyPressed(Keyboard::Left))
+            {
+                if (paddle.getPosition().x > 0)
+                {
+                    paddle.move(-paddleSpeed, 0);
+                }
+            }
+
+            ball.move(ball_speedX, ball_speedY);
+            if (ball.getPosition().x < 0 || ball.getPosition().x > windowWidth - Ball_radius * 2)
+            {
+                ball_speedX = -ball_speedX;
+            }
+
+            if (ball.getPosition().y < 0)
+            {
+                ball_speedY = -ball_speedY;
+            }
+
+            if (ball.getGlobalBounds().intersects(paddle.getGlobalBounds()))
+            {
+                ball_speedY = -ball_speedY;
+            }
+
+            // Collision with bricks
+            int remainingBricks = 0;
+            for (int i = 0; i < bricks; ++i)
+            {
+                if (brick[i].getPosition().x != -100) // Only count bricks that are still in the game
+                {
+                    remainingBricks++;
+                    if (brick[i].getGlobalBounds().intersects(ball.getGlobalBounds()))
+                    {
+                        brick[i].setPosition(-100, -100); // remove brick
+                        ball_speedY = -ball_speedY;
+                        ball_speedX = -ball_speedX; // Reverse ball horizontally
+                        points++; // increment points
+                        std::system("cls"); // clear console
+                        std::cout << "Points: " << points << std::endl; // print points
+                    }
+                }
+            }
+            if (ball.getPosition().y > windowHeight)
+            {
+                // Game over, close the window
+                window.close();
+            }
+
+            // Check if player has won (all bricks are removed)
+            if (remainingBricks == 0)
+            {
+                // Player won, close the window
+                window.close();
+            }
+
+
+            window.clear();
+
+            for (int i = 0; i < bricks; ++i)
+            {
+                window.draw(brick[i]);
+            }
+
+            window.draw(paddle);
+            window.draw(ball);
+            window.display();
+
+        }
+        window.close();
+    }
+
+    void rungame2()
+    {
+        RenderWindow window(VideoMode(250, 200), "BrickBreaker");
+        window.setFramerateLimit(60); // Set a fixed frame rate
+
+        const int bricks = 30;
+        const int bricksPerRow = 10;
+        RectangleShape brick[bricks];
+
+        for (int i = 0; i < bricks; ++i)
+        {
+            brick[i].setSize(Vector2f(20, 10));
+            brick[i].setFillColor(Color::Yellow);
+            brick[i].setPosition(2 + (i % bricksPerRow) * 25, 20 + (i / bricksPerRow) * 15);
+        }
+
+        float paddleWidth = 55;
+        float paddleHeight = 10;
+        RectangleShape paddle(Vector2f(paddleWidth, paddleHeight));
+        paddle.setFillColor(Color::Red);
+
+        float windowWidth = window.getSize().x;
+        float windowHeight = window.getSize().y;
+        float xAxis = (windowWidth - paddleWidth) / 2;
+        float yAxis = windowHeight - paddleHeight;
+
+        paddle.setPosition(xAxis, yAxis);
+
+        float Ball_radius = 5.0;
+        CircleShape ball(Ball_radius);
+        ball.setFillColor(Color::Magenta);
+        ball.setPosition(windowWidth / 2, windowHeight / 2);
+
+        float ball_speedX = 3.5;
+        float ball_speedY = -3.5;
+        int points = 0;
+        while (window.isOpen())
+        {
+            Event event;
+            while (window.pollEvent(event))
+            {
+                if (event.type == Event::Closed)
+                {
+                    window.close();
+                }
+            }
+
+            float paddleSpeed = 5.0;
+
+            if (Keyboard::isKeyPressed(Keyboard::Right))
+            {
+                if (paddle.getPosition().x + paddleWidth < windowWidth)
+                {
+                    paddle.move(paddleSpeed, 0);
+                }
+            }
+
+            if (Keyboard::isKeyPressed(Keyboard::Left))
+            {
+                if (paddle.getPosition().x > 0)
+                {
+                    paddle.move(-paddleSpeed, 0);
+                }
+            }
+
+            ball.move(ball_speedX, ball_speedY);
+            if (ball.getPosition().x < 0 || ball.getPosition().x > windowWidth - Ball_radius * 2)
+            {
+                ball_speedX = -ball_speedX;
+            }
+
+            if (ball.getPosition().y < 0)
+            {
+                ball_speedY = -ball_speedY;
+            }
+
+            if (ball.getGlobalBounds().intersects(paddle.getGlobalBounds()))
+            {
+                ball_speedY = -ball_speedY;
+            }
+
+            // Collision with bricks
+            int remainingBricks = 0;
+            for (int i = 0; i < bricks; ++i)
+            {
+                if (brick[i].getPosition().x != -100) // Only count bricks that are still in the game
+                {
+                    remainingBricks++;
+                    if (brick[i].getGlobalBounds().intersects(ball.getGlobalBounds()))
+                    {
+                        brick[i].setPosition(-100, -100); // remove brick
+                        ball_speedY = -ball_speedY;
+                        ball_speedX = -ball_speedX; // Reverse ball horizontally
+                        points++; // increment points
+                        system("cls"); // clear console
+                        cout << "Points: " << points << endl; // print points
+
+                    }
+                }
+            }
+            if (ball.getPosition().y > windowHeight)
+            {
+                // Game over, close the window
+                window.close();
+            }
+
+            // Check if player has won (all bricks are removed)
+            if (remainingBricks == 0)
+            {
+                // Player won, close the window
+                window.close();
+
+            }
+
+
+            window.clear();
+
+            for (int i = 0; i < bricks; ++i)
+            {
+                window.draw(brick[i]);
+            }
+
+            window.draw(paddle);
+            window.draw(ball);
+            window.display();
+
+        }
+        window.close();
+
+    }
+};
+
+
+int main()
+{
+    system("color 6");
+    const int consoleWidth = 170; // Adjust this value based on your console width
+
+    // Calculating the starting position to center the text
+    const int padding = (consoleWidth - 88) / 2; // 88 is the approximate width of the longest line of text
+
+    cout << endl << endl << endl << endl;
+    cout << setw(padding) << "" << " __            __   ______    _           ______      _______      __      __     ______       _________      _______      " << endl;
+    cout << setw(padding) << "" << " \\ \\    __    / /  |  ____|  | |         / _____\\    / _____ \\    |  \\    /  |   | _____|     |___   ___|    / _____ \\" << endl;
+    cout << setw(padding) << "" << "  \\ \\  /  \\  / /   | |____   | |        / /         / /     \\ \\   | | \\  / | |   | |____          | |       / /     \\ \\" << endl;
+    cout << setw(padding) << "" << "   \\ \\/ /\\ \\/ /    |  ____|  | |       | |         | |       | |  | |\\ \\/ /| |   |  ____|         | |      | |       | |" << endl;
+    cout << setw(padding) << "" << "    \\  /  \\  /     | |____   | |_____   \\ \\_____    \\ \\_____/ /   | | \\  / | |   | |____          | |       \\ \\_____/ /" << endl;
+    cout << setw(padding) << "" << "     \\/    \\/      |______|  |_______|   \\______/    \\_______/    |_|  \\/  |_|   |______|         |_|        \\_______/" << endl;
+    cout << endl;
+
+    cout << setw(padding) << "" << "                                  _______           /\\        __      __    ______          " << endl;
+    cout << setw(padding) << "" << "                                 / ______\\         /  \\      |  \\    /  |  |  ____|       " << endl;
+    cout << setw(padding) << "" << "                                / /   ______      / /\\ \\     | | \\  / | |  | |____        " << endl;
+    cout << setw(padding) << "" << "                               | |   |_____ |    / /__\\ \\    | |\\ \\/ /| |  |  ____|      " << endl;
+    cout << setw(padding) << "" << "                                \\ \\_______| |   / ______ \\   | | \\  / | |  | |____       " << endl;
+    cout << setw(padding) << "" << "                                 \\_______/|_|  /_/      \\_\\  |_|  \\/  |_|  |______|      " << endl;
+
+    cout << setw(padding) << "" << "               _             /\\        _       _    ___     _      ______    _      _    ______     _____   " << endl;
+    cout << setw(padding) << "" << "              | |           /  \\      | |     | |  |   \\   | |    / _____\\  | |    | |  |  ____|   / ___ \\  " << endl;
+    cout << setw(padding) << "" << "              | |          / /\\ \\     | |     | |  | |\\ \\  | |   / /        | |____| |  | |____   | |___| | " << endl;
+    cout << setw(padding) << "" << "              | |         / /__\\ \\    | |     | |  | | \\ \\ | |  | |         |  ____  |  |  ____|  |  __  /  " << endl;
+    cout << setw(padding) << "" << "              | |____    / ______ \\   | \\ ____/ |  | |  \\ \\| |   \\ \\______  | |    | |  | |____   | |  \\ \\  " << endl;
+    cout << setw(padding) << "" << "              |______|  /_/      \\_\\   \\_______/   |_|   \\___|    \\______/  |_|    |_|  |______|  |_|   \\_\\ " << endl;
+
+    cout << endl << endl;
+
+    cout << setw(90) << "" << "Press Enter To Start.... ";
+    cin.get();
+    system("cls");
+    Game gm;
+    cout << endl << endl << endl << endl;
+    cout << endl << endl << endl << endl;
+    cout << endl << endl << endl << endl;
+    cout << endl << endl << endl << endl;
+    cout << endl << endl << endl << endl;
+
+    system("cls");
+
+
+    int choice;
+    bool condition = true;
+    bool chk = true;
+
+    while (condition == true)
+    {
+
+
+        system("cls");
+        system("color 7");
+        cout << endl << endl << endl << endl << endl << endl;;
+        cout << setw(140) << "/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/" << endl;
+        cout << setw(140) << "\\                            SELECT_THE_GAME                                      / " << endl;
+        cout << setw(140) << "/                                                                                 \\" << endl;
+        cout << setw(140) << "/                                                                                  \\" << endl;
+        cout << setw(140) << "\\                          1. Quizz Game                                          /" << endl;
+        cout << setw(140) << "/                           2. Hangman Game                                        \\" << endl;
+        cout << setw(140) << "\\                          3. Brick-Breaker Game                                  /" << endl;
+        cout << setw(140) << "/                           4. Exit                                                \\" << endl;
+        cout << setw(140) << "/                                                                                  \\" << endl;
+        cout << setw(140) << "/                                                                                  \\" << endl;
+        cout << setw(140) << "\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/" << endl << endl;
+        system("color 9");
+        cout << setw(105) << "Enter your choice: ";
+        cout << setw(105); cin >> choice;
+        while (choice > 4 || choice < 0)
+        {
+            cout << " -_- Re-Enter Your Choice: ";
+            cin >> choice;
+        }
+        system("cls");
+        system("color A");
+
+
+        Quiz  quizz;
+        Hangman  hang;
+        BrickBreakerGame  brick;
+
+        Game* game;
+        game = &quizz;
+        game = &hang;
+        game = &brick;
+
+
+        if (choice == 1)
+        {
+            int choose;
+            system("color B");
+            cout << endl << endl << endl << endl;
+            cout << setw(135) << "                                                                   " << endl << endl;
+            cout << setw(135) << "    ******************************************Quiz~Game**************************************" << endl;
+            cout << setw(135) << "    *                                                                                       *" << endl;
+            cout << setw(135) << "    *                                                                                       *" << endl;
+            cout << setw(135) << "    *                                   1. Start The Game                                   *" << endl;
+            cout << setw(135) << "    *                                   2. Introduction About The Game                      *" << endl;
+            cout << setw(135) << "    *                                   3. Quit The Game                                    *" << endl;
+            cout << setw(135) << "    *                                                                                       *" << endl;
+            cout << setw(135) << "    *****************************************************************************************" << endl;
+            cout << endl;
+            system("color 5");
+            cout << setw(110) << " Please Select the Options   ";
+            cout << setw(110); cin >> choose; // Get player's choice
+            system("cls");
+
+
+            if (choose == 1)
+            {
+                Quiz player1;
+                Quiz player2;
+                bool isPlayer1Turn = true;
+
+                for (int i = 0; i < 20; ++i)
+                {
+                    if (isPlayer1Turn)
+                    {
+                        player1.display("Player 1");
+                        system("cls");
+                    }
+                    else
+                    {
+                        player2.display("Player 2");
+                        system("cls");
+                    }
+                    isPlayer1Turn = !isPlayer1Turn;
+                }
+
+                int player1Score = player1.getCorrectCount();
+                int player2Score = player2.getCorrectCount();
+
+                cout << "\nFinal Scores:\n";
+                cout << "Player 1: " << player1Score << endl;
+                cout << "Player 2: " << player2Score << endl;
+
+                if (player1Score > player2Score)
+                {
+                    cout << "Player 1 wins!" << endl;
+                }
+                else if (player2Score > player1Score)
+                {
+                    cout << "Player 2 wins!" << endl;
+                }
+                else
+                {
+                    cout << "It's a tie!" << endl;
+                }
+                cout << endl << endl << endl << endl;
+                cout << endl << endl << endl << endl;
+                cout << endl << endl << endl << endl;
+                cout << endl << endl << endl << endl;
+                cout << endl << endl << endl << endl;
+
+
+                cout << endl;
+                int c;
+                cout << "Enter 0 to clear....";
+                cin >> c;
+
+                system("cls");
+
+            }
+
+            if (choose == 2)
+            {
+
+                system("cls");
+                displayInstructions("D:\\Works of Univ\\instructions.txt");
+                int c;
+                cout << "Enter 0 to clear....";
+                cin >> c;
+
+                system("cls");
+            }
+            if (choose == 3)
+            {
+
+                continue;
+            }
+        }
+        else if (choice == 2)
+        {
+
+            int choose;
+            system("color B");
+            cout << endl << endl << endl << endl;
+            cout << setw(125) << "                                                                   " << endl << endl;
+            cout << setw(125) << "   ****************************************HangMan~Game************************************" << endl;
+            cout << setw(125) << "   *                                                                                      *" << endl;
+            cout << setw(125) << "   *                                                                                      *" << endl;
+            cout << setw(125) << "   *                                 1. Start The Game                                    *" << endl;
+            cout << setw(125) << "   *                                 2. Introduction About The Game                       *" << endl;
+            cout << setw(125) << "   *                                 3. Quit The Game                                     *" << endl;
+            cout << setw(125) << "   *                                                                                      *" << endl;
+            cout << setw(125) << "   ****************************************************************************************" << endl;
+            cout << endl;
+            cout << endl;
+            system("color 5");
+            cout << setw(110) << " Please Select the Options   ";
+            cout << setw(110); cin >> choose;
+            system("cls");
+            cout << endl << endl << endl << endl;
+            cout << endl << endl << endl << endl;
+            cout << endl << endl << endl << endl;
+            cout << endl << endl << endl << endl;
+            cout << endl << endl << endl << endl;
+
+
+            if (choose == 1)
+            {
+                system("cls");
+                cout << endl;
+                hang.play();
+                if (game->play_or_not())
+                {
+                    hang.play();
+                }
+
+                int c;
+                cout << "Enter 0 to clear....";
+                cin >> c;
+
+                system("cls");
+
+            }
+
+            if (choose == 2)
+            {
+
+                cout << endl << endl << endl << endl;
+                cout << endl << endl << endl << endl;
+                cout << endl << endl << endl << endl;
+                cout << endl << endl << endl << endl;
+                cout << endl << endl << endl << endl;
+                system("cls");
+                displayInstructions("D:\\Works of Univ\\instruction.txt");
+
+                int c;
+                cout << "Enter 0 to clear....";
+                cin >> c;
+
+                system("cls");
+
+            }
+
+            if (choose == 3)
+            {
+                continue;
+            }
+        }
+        else if (choice == 3)
+        {
+            int choose;
+            cout << endl << endl << endl << endl;
+            cout << setw(135) << "                                                                   " << endl << endl;
+            cout << setw(135) << "    *******************************Brick~Breaker~Game*********************************" << endl;
+            cout << setw(135) << "    *                                                                                *" << endl;
+            cout << setw(135) << "    *                                                                                *" << endl;
+            cout << setw(135) << "    *                            1. Start The Game                                   *" << endl;
+            cout << setw(135) << "    *                            2. Instructions                                     *" << endl;
+            cout << setw(135) << "    *                            3. Quit                                             *" << endl;
+            cout << setw(135) << "    *                                                                                *" << endl;
+            cout << setw(135) << "    *                                                                                *" << endl;
+            cout << setw(135) << "    **********************************************************************************" << endl;
+
+            cout << endl << endl << endl;
+            cout << setw(125) << "Enter Your Choice: ";
+            cin >> choose;
+
+            while (choose > 3 || choose < 1)
+            {
+                cout << " -_- Re-Enter Your Choice: ";
+                cin >> choose;
+            }
+            system("cls");
+
+            if (choose == 1)
+            {
+                system("color E");
+                int difficulty;
+                cout << endl << endl << endl << endl;
+                cout << setw(130) << "                                   " << endl << endl;
+                cout << setw(130) << "    ************************Brick~Breaker~Game*******************" << endl;
+                cout << setw(130) << "    *                                                           *" << endl;
+                cout << setw(130) << "    *                                                           *" << endl;
+                cout << setw(130) << "    *                       1. Easy                             *" << endl;
+                cout << setw(130) << "    *                       2. Medium                           *" << endl;
+                cout << setw(130) << "    *                       3. Hard                             *" << endl;
+                cout << setw(130) << "    *                                                           *" << endl;
+                cout << setw(130) << "    *                                                           *" << endl;
+                cout << setw(130) << "    *************************************************************" << endl;
+
+                cout << endl << endl << endl;
+                cout << setw(120) << "Enter Your Choice: ";
+                cin >> difficulty;
+
+                while (difficulty > 3 || difficulty < 1) {
+                    cout << " -_- Re-Enter Your Choice: ";
+                    cin >> difficulty;
+                }
+
+                system("cls");
+
+                if (difficulty == 1)
+                {
+                    brick.runGame();
+                    if (game->play_or_not())
+                    {
+                        brick.runGame();
+                    }
+
+                    int c;
+                    cout << endl;
+                    cout << setw(110) << "Enter 0 to clear....";
+                    cin >> c;
+                    system("cls");
+                }
+                if (difficulty == 2)
+                {
+                    brick.rungame1();
+                    if (game->play_or_not())
+                    {
+                        brick.rungame1();
+                    }
+                    int c;
+                    cout << endl;
+                    cout << setw(110) << "Enter 0 to clear....";
+                    cin >> c;
+                    system("cls");
+                }
+                if (difficulty == 3)
+                {
+                    brick.rungame2();
+                    if (game->play_or_not())
+                    {
+                        brick.rungame2();
+                    }
+
+                    int c;
+                    cout << endl;
+                    cout << setw(110) << "Enter 0 to clear....";
+                    cin >> c;
+                    system("cls");
+                }
+            }
+            if (choose == 2)
+            {
+                displayInstructions("D:\\Works of Univ\\instructions.txt");
+                int c;
+                cout << "Enter 0 to clear....";
+                cin >> c;
+
+                system("cls");
+            }
+            if (choose == 3)
+            {
+                continue; // Return to the main menu
+            }
+        }
+
+
+        else if (choice == 4) {
+            cout << endl << endl << endl << endl;
+            cout << endl << endl << endl << endl;
+
+
+            cout << setw(110) << "  _____      _ _ ___    " << endl;
+            cout << setw(110) << " | ____|_  _(_) | |     " << endl;
+            cout << setw(110) << " |  _| \\ \\/ / | |     " << endl;
+            cout << setw(110) << " | |___ >  <| | | |     " << endl;
+            cout << setw(110) << " |_____/_/\\_\\_|_|     " << endl;
+            cout << setw(110) << "      Exiting...        " << endl;
+
+            int c;
+            cout << endl;
+            cout << setw(110) << "Enter 0 to clear....";
+            cin >> c;
+            condition = false;
+        }
+
+    }
+    return 0;
+}
