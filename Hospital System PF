@@ -1,0 +1,803 @@
+#include <iostream>
+#include <string>
+#include <fstream>
+using namespace std;
+
+// Global Variable 
+string Disease_Selection;
+
+//Row of Array
+const int NUM_DOCTORS = 7; // Define the number of doctors
+
+// Array to store doctor schedules
+const string doctorSchedules[NUM_DOCTORS][3] =
+{
+    {
+        "Monday To Friday 9AM - 5PM",
+        "Saturday 10AM - 1PM",
+        "Sunday OFF"
+    }, // Dr. Muhammad Nouman Qamar's schedule
+
+    {
+        "Monday To Friday 1PM - 9PM",
+        "Saturday 1PM - 5PM",
+        "Sunday OFF"
+    }, // Dr. Zunaira's schedule
+
+    {
+        "Monday To Friday 8AM - 6PM",
+        "Saturday 10AM - 1PM",
+        "Sunday 3PM - 5PM"
+    }, // Dr. Munazza Anwar schedule
+
+    {
+        "Monday To Friday 9AM - 1PM",
+        "Saturday 10AM - 1PM",
+        "Sunday 7PM - 9PM"
+    }, // Dr. Safiullah Aamir's schedule
+
+    {
+        "Monday To Friday 11AM - 4PM",
+        "Saturday 9AM - 3PM",
+        "Sunday 12PM - 2PM"
+    }, // Dr. Fatima Shams's schedule
+
+    {
+        "Monday To Friday 12PM - 3PM",
+        "Saturday 8AM - 12PM",
+        "Sunday OFF"
+    }, // Dr. Muhammad Ahmad Asif's schedule
+    {
+        "Monday To Friday 1PM - 12PM",
+        "Saturday 8AM - 12PM",
+        "Sunday OFF"
+    } // Dr. Batool Qutbuddin's schedule
+};
+
+
+ 
+  //Proto-Type of Calcultion of Bill
+ int Medicine_Bill();
+
+ //Ptot - Type for Doctor Fee
+ int calculateDoctorFee(int chosen_) ;
+
+// Proto- Type for fILES
+
+void FileDisease1();
+void FileDisease2();
+void FileDisease3();
+void FileDisease4();
+void FileDisease5();
+void FileDisease6();
+void FileDisease7();
+
+//Proto-Type for Ward Selection
+string recommendWard(string disease, int age);
+
+ void Doctor1 ()
+{
+            cout<< "Monday    " " 9:00 AM  - 11:00 PM" <<endl;
+            cout<< "Tuesday   " " 10:00 AM - 12:00 PM" <<endl;
+            cout<< "Wednesday " " 1:00 AM  - 3:00 PM"  <<endl;
+            cout<< "Thursday  " " 9:00 AM  - 12:00 PM" <<endl;
+            cout<< "Friday    " " 3:00 AM  - 5:00 PM"  <<endl;
+            cout<< "Saturday  " " 10:00 AM - 1:00 PM"  <<endl;
+            cout<< "Sunday    " "        OFF       "   <<endl;
+}
+void Doctor2 ()
+{
+            cout<< "Monday    " " 1:00 PM  - 3:00 PM"  <<endl;
+            cout<< "Tuesday   " " 5:00 PM  - 7:00 PM"  <<endl;
+            cout<< "Wednesday " " 11:00 PM - 10:00 PM" <<endl;
+            cout<< "Thursday  " " 1:00 PM  - 2:30 PM"  <<endl;
+            cout<< "Friday    " " 1:00 PM  - 4:00 PM"  <<endl;
+            cout<< "Saturday  " " 1:00 PM  - 5:00 PM"  <<endl;
+            cout<< "Sunday    " "        OFF       "   <<endl;
+}
+void Doctor3 ()
+{
+            cout<< "Monday    " " 8:00 AM  - 10:00 PM" <<endl;
+            cout<< "Tuesday   " " 9:00 AM  - 11:00 PM" <<endl;
+            cout<< "Wednesday " " 10:00 AM - 12:00 PM" <<endl;
+            cout<< "Thursday  " " 1:00 AM  - 2:00 PM"  <<endl;
+            cout<< "Friday    " " 3:00 AM  - 5:00 PM"  <<endl;
+            cout<< "Saturday  " " 10:00 AM - 1:00 PM"  <<endl;
+            cout<< "Sunday    " " 3:00 PM  - 5:00 PM"  <<endl;
+}
+void Doctor4 ()
+{
+            cout<< "Monday    " " 11:00 PM - 1:00 PM"  <<endl;
+            cout<< "Tuesday   " " 9:00 PM  - 10:00 PM" <<endl;
+            cout<< "Wednesday " " 2:00 PM  - 4:00 PM"  <<endl;
+            cout<< "Thursday  " " 1:00 PM  - 2:00 PM"  <<endl;
+            cout<< "Friday    " " 9:00 PM  - 1:00 PM"  <<endl;
+            cout<< "Saturday  " " 10:00 PM - 1:00 PM"  <<endl;
+            cout<< "Sunday    " " 7:00 PM  - 9:00 PM"  <<endl;
+}
+void Doctor5 ()
+{ 
+            cout<< "Monday    " " 09:00 PM - 11:00 PM" <<endl;
+            cout<< "Tuesday   " " 11:00 PM - 1:00 PM"  <<endl;
+            cout<< "Wednesday " " 12:00 PM - 2:00 PM"  <<endl;
+            cout<< "Thursday  " " 11:00 PM - 4:00 PM"  <<endl;
+            cout<< "Friday    " " 1:00 PM  - 2:30 PM"  <<endl;
+            cout<< "Saturday  " " 9:00 PM  - 3:00 PM"  <<endl;
+            cout<< "Sunday    " " 12:00 PM - 2:00 PM"  <<endl;
+}
+void Doctor6 ()
+{
+           cout<< "Monday     " " 12:00 PM - 3:00 PM"  <<endl;
+           cout<< "Tuesday    " " 02:00 PM - 3:00 PM"  <<endl;
+           cout<< "Wednesday  " " 01:00 PM - 3:00 PM"  <<endl;
+           cout<< "Thursday   " " 11:00 PM - 1:00 PM"  <<endl;
+           cout<< "Friday     " " 12:00 PM - 2:00 PM"  <<endl;
+           cout<< "Saturday   " " 8:00 AM  - 12:00 PM" <<endl;
+           cout<< "Sunday     " "        OFF        "  <<endl;
+}
+void Doctor7 ()
+{
+           cout<< "Monday     " " 01:00 PM - 4:00 PM"  <<endl;
+           cout<< "Tuesday    " " 02:00 PM - 5:00 PM"  <<endl;
+           cout<< "Wednesday  " " 12:00 PM - 3:00 PM"  <<endl;
+           cout<< "Thursday   " " 10:00 PM - 2:00 PM"  <<endl;
+           cout<< "Friday     " " 09:00 PM - 1:00 PM"  <<endl;
+           cout<< "Saturday   " " 8:00 AM  - 12:00 PM" <<endl;
+           cout<< "Sunday     " "        OFF        "  <<endl;
+}
+
+
+int main()
+{
+    system("color 70");
+    bool repeat = true;
+    while (true)
+    {
+       
+    
+    
+    cout << "==============================================================================" << endl;
+    cout << "                        CELESTIAL HEALTH HAVEN                                " << endl;
+    cout << "==============================================================================" << endl;
+
+                                        // Hospital Faculty  //
+    int choose;
+
+    cout << "                   Faculty Doctor's                               " << endl;
+    cout << "ID (1001)  Dr. Muhammad Nouman Qamar    (Cardiology Specialist)   " << endl;
+    cout << "ID (2002)  Dr. Zunaira Maalik           (Dermatologist)            " << endl;
+    cout << "ID (3003)  Dr. Munazza Anwar            (ENT Specialist)           " << endl;
+    cout << "ID (4004)  Dr. Safiullah Aamir          (Pulmonologist)            " << endl;
+    cout << "ID (5005)  Dr. Fatima Shams             (Orthopaedic Specialist)   " << endl;
+    cout << "ID (6006)  Dr. Muhammad Ahmad Asif      (Psychiatrist)              " << endl;
+    cout << "ID (7007)  Dr. Batool Qutbuddin         (General Physician)         " << endl;
+    cout << endl;
+    cout << "Please Choose Your Doctor: ";
+    cin >> choose;
+    cout << endl;
+
+                                     // Info About Background of Doctor
+     while (choose < 1001 || choose > 7007) 
+    {
+        cout << "Invalid choice! Please enter a number between 1001 and 7007: ";
+        cin >> choose;
+    }
+
+    if (choose == 1001)
+     {
+        cout << "<==========================================================>" << endl;
+        cout << "                     Dr. Muhammad Noman Qamar               " << endl;
+        cout << "                                                            " << endl;
+        cout << "              MBBS,FPFC, Speciliazed in Cardiology          " << endl;
+        cout << "            PHD in Medicine From Queen's University         " << endl;
+        cout << "                       London, England                      " << endl;
+        cout << "<==========================================================>" << endl;
+    } 
+    else if (choose == 2002) 
+    {
+        cout << "<==========================================================>" << endl;
+        cout << "                     Dr. Zunaira Maalik                     " << endl;
+        cout << "                                                            " << endl;
+        cout << "              MBBS,FPFC, Specilized in Dermatology          " << endl;
+        cout << "          PHD in Skin Care From King Edward Medical         " << endl;
+        cout << "                 Institute Lahore, Pakistan                 " << endl;
+        cout << "<==========================================================>" << endl;
+    } 
+    else if (choose == 3003) 
+    {
+        cout << "<==========================================================>" << endl;
+        cout << "                     Dr. Munazza Anwar                      " << endl;
+        cout << "                                                            " << endl;
+        cout << "                MBBS,FPFC, Specilized in ENT                " << endl;
+        cout << "               PHD in Infectious Diseases From              " << endl;
+        cout << "            Cambridge University , United Kingdom           " << endl;
+        cout << "<==========================================================>" << endl;
+    } 
+    else if (choose == 4004) 
+    {
+        cout << "<==========================================================>" << endl;
+        cout << "                    Dr. Safiullah Aamir                     " << endl;
+        cout << "                                                            " << endl;
+        cout << "              MBBS, Specilized in Pulmonology               " << endl;
+        cout << "         PHD in Medicine From Standford University          " << endl;
+        cout << "                     California, UK                         " << endl;
+        cout << "<==========================================================>" << endl;
+    } 
+    else if (choose == 5005) 
+    {
+        cout << "<==========================================================>" << endl;
+        cout << "                     Dr. Fatima Shams                       " << endl;
+        cout << "                                                            " << endl;
+        cout << "               MBBS, Specilized in Orthopeady               " << endl;
+        cout << "              PHD in Structure of bones from                " << endl;
+        cout << "               Massachusetts Institute, USA                 " << endl;
+        cout << "<==========================================================>" << endl;
+    }
+    else if (choose == 6006) 
+    {
+        cout << "<==========================================================>" << endl;
+        cout << "                     Dr. Muhammad Ahmad Asif                " << endl;
+        cout << "                                                            " << endl;
+        cout << "               MBBS, Specilized in Psychatrist              " << endl;
+        cout << "           PHD in Structure of Mental Health from           " << endl;
+        cout << "               University of California , USA               " << endl;
+        cout << "<==========================================================>" << endl;
+    }
+     else if (choose == 7007) 
+    {
+        cout << "<==========================================================>" << endl;
+        cout << "                     Dr. Batool Qutbuddin                   " << endl;
+        cout << "                                                            " << endl;
+        cout << "            MBBS, Specilized in Preventive HealthCare       " << endl;
+        cout << "          PHD in HealthCare From King Edward Medical        " << endl;
+        cout << "                 Institute Lahore, Pakistan                 " << endl;
+        cout << "<==========================================================>" << endl;
+    } 
+                  
+                                                // Briefly Info For Doctor Shedule
+
+  
+    cout << endl;
+
+    if (choose == 1001) 
+    {
+        cout << "<==========================================================>"      << endl;
+        cout << "                  Doctor's Schedule :                             "<< endl;
+        cout <<       doctorSchedules[0][0]                                         << endl;
+        cout <<       doctorSchedules[0][1]                                         << endl;
+        cout <<       doctorSchedules[0][2]                                         << endl;
+        cout << "<==========================================================>"      << endl;
+        cout << endl;
+    } 
+    else if (choose == 2002) 
+    {
+        cout << "<==========================================================>"      << endl;
+        cout << "                  Doctor's Schedule : "                            << endl;
+        cout <<       doctorSchedules[1][0]                                         << endl;
+        cout <<       doctorSchedules[1][1]                                         << endl;
+        cout <<       doctorSchedules[1][2]                                          << endl;
+        cout << "<==========================================================>"      << endl;
+        cout << endl;
+    } 
+     if (choose == 3003) 
+    {
+        cout << "<==========================================================>"      << endl;
+        cout << "                  Doctor's Schedule : "                            << endl;
+        cout <<       doctorSchedules[2][0]                                         << endl;
+        cout <<       doctorSchedules[2][1]                                         << endl;
+        cout <<       doctorSchedules[2][2]                                         << endl;
+        cout << "<==========================================================>"      << endl;
+        cout << endl;
+    } 
+     if (choose == 4004) 
+    {
+        cout << "<==========================================================>"      << endl;
+        cout << "                  Doctor's Schedule : "                            << endl;
+        cout <<       doctorSchedules[3][0]                                         << endl;
+        cout <<       doctorSchedules[3][1]                                         << endl;
+        cout <<       doctorSchedules[3][2]                                         << endl;
+        cout << "<==========================================================>"      << endl;
+        cout << endl;
+    } 
+    if (choose == 5005) 
+    {
+        cout << "<==========================================================>"      << endl;
+        cout << "                  Doctor's Schedule : "                            << endl;
+        cout <<       doctorSchedules[4][0]                                         << endl;
+        cout <<       doctorSchedules[4][1]                                         << endl;
+        cout <<       doctorSchedules[4][2]                                         << endl;
+        cout << "<==========================================================>"      << endl;
+        cout << endl;
+    } 
+    if (choose == 6006) 
+    {
+        cout << "<==========================================================>"      << endl;
+        cout << "                  Doctor's Schedule : "                            << endl;
+        cout <<       doctorSchedules[5][0]                                         << endl;
+        cout <<       doctorSchedules[5][1]                                         << endl;
+        cout <<       doctorSchedules[5][2]                                         << endl;
+        cout << "<==========================================================>"      << endl;
+        cout << endl;
+    }  
+    if (choose == 7007) 
+    {
+        cout << "<==========================================================>"      << endl;
+        cout << "                  Doctor's Schedule : "                            << endl;
+        cout <<       doctorSchedules[6][0]                                         << endl;
+        cout <<       doctorSchedules[6][1]                                         << endl;
+        cout <<       doctorSchedules[6][2]                                         << endl;
+        cout << "<==========================================================>"      << endl;
+        cout << endl;
+    }     
+
+
+                                                          //  User selected Doctor Detailed  Appoinment info
+    
+    int user_choose;
+    cout<<"Detailed Schedule of Given Id Doctor is : ";
+    cin>> user_choose;
+    
+        if (user_choose == 1001)
+        {
+            Doctor1 ();
+        }
+        else if (user_choose == 2002)
+        {
+            Doctor2 ();
+        }
+        else if (user_choose == 3003)
+        {
+            Doctor3 ();
+        }
+        else if (user_choose == 4004)
+        {
+            Doctor4 ();
+        }
+        else if (user_choose == 5005)
+        {
+            Doctor5 ();
+        }
+        else if (user_choose == 6006)
+        {
+            
+            Doctor6 ();
+        }
+        else if (user_choose == 7007)
+        {
+            
+            Doctor7 ();
+        }
+        
+    cout << "<==========================================================>"      << endl;
+
+                                                         //File Handling for Patient & Disease Area 
+   
+      // PATIENT INFORMATION
+	   cout<<"---------------- Patient Info ------------------- ";
+       cout<<endl;
+       string Patient_Name;
+       cin.ignore();
+       cout << "\nAsk Patient For His/Her Name: ";
+       getline(cin, Patient_Name);
+       cout<<endl;
+       string Address;
+       cout << "Ask Patient For His/Her Address: ";
+       getline(cin, Address);
+
+       cout<<endl;
+       string contact_no_1;
+       cout << "Ask Patient for His/Her Contact Info: ";
+       getline(cin, contact_no_1);
+
+       string Blood_Group;
+       cout << "\nPatient Blood Group = ";
+       cin >> Blood_Group;
+       cout<<endl;
+		
+	   //to write
+	   ofstream Patient_Info; 
+	   Patient_Info.open("D:\\Works of Univ\\patient-info.txt", ios_base::app ); 
+	   Patient_Info << Patient_Name <<"\t" << Blood_Group << "\t" << Address << "\t" << contact_no_1 << endl;
+       Patient_Info.close();
+    int Age = 0;
+    
+       
+	   cout <<  "<==========================================================>"      << endl;
+      
+      
+      cout<<" Enter The Disease (Cough , Flu , Fever , Headache , Diarrhea , Dangue , Nephrolotheisis): ";
+      cin>>  Disease_Selection;
+
+    
+      
+      if (Disease_Selection =="Cough" || Disease_Selection =="cough")
+      {
+        FileDisease1();
+      }
+      else if (Disease_Selection == "Flu" || Disease_Selection == "flu")
+      {
+        FileDisease2();
+      }
+      else if (Disease_Selection == "Fever" || Disease_Selection == "fever")
+      {
+        FileDisease3();
+      }
+      else if (Disease_Selection == "Headache" || Disease_Selection == "headache")
+      {
+        FileDisease4();
+      }
+      else if (Disease_Selection == "Diarrhea" || Disease_Selection == "diarrhea")
+      {
+        FileDisease5();
+       cout << recommendWard(Disease_Selection,Age) << endl;
+      }
+      else if (Disease_Selection == "Dangue" || Disease_Selection == "dangue")
+      {
+        FileDisease6();
+        cout << recommendWard(Disease_Selection,Age) << endl;
+      }
+      else if (Disease_Selection == "Nephrolotheisis" || Disease_Selection == "nephrolotheisis")
+      {
+        FileDisease7();
+        cout << recommendWard(Disease_Selection,Age) << endl;
+      }
+
+                                                           // Bill Calculations Area
+
+    //Calculate Bill for Medicine 
+
+    double medicine_Bill  = Medicine_Bill () ;
+
+    cout<<"The Medicine Bill is : " << medicine_Bill <<endl;
+
+
+   // CALCULATE BILL For Doctor
+  
+      int Bill =  calculateDoctorFee(choose);
+
+    cout << "The  Bill for the Doctor : " << Bill << endl;
+
+    //Total Bill include Doctor + Medicine Bill
+
+    int Total_Bill =  Medicine_Bill () + calculateDoctorFee(choose);
+    cout<<" The Total Bill for Patient is : "<<Total_Bill<<endl;
+    
+    int c;
+    cout << "Enter 0 to clear....";
+    cin  >> c;
+    
+    system("cls");
+    }
+    return 0 ;
+}
+   
+                                                     //Function's Area
+
+  //Function For Medicine cost
+
+  int Medicine_Bill ()
+  {
+    double totalBill = 0.0;
+    int tax = 100;
+
+    // Assign costs to medications or treatments
+    if (Disease_Selection == "Cough" || Disease_Selection == "cough") 
+    {
+        totalBill += (250.0 + tax) ;  // Cost of hydryllin syrup
+        totalBill += (150.0 + tax) ; // Cost of Tab. Arinac fort
+
+    } 
+    else if (Disease_Selection == "Flu" || Disease_Selection == "flu") 
+    {
+        totalBill += 30.0 + tax ;  // Cost of Tab. Softin
+        totalBill += 25.0 + tax ;  // Cost of Tab. Jardin
+        
+    } 
+    else if (Disease_Selection =="Fever" || Disease_Selection == "fever")
+    {
+        totalBill += 200.0 + tax ;  // Cost of Tab. Brufen
+        totalBill += 150.0 + tax ;  // Cost of Tab. Amoxil
+    }
+    else if (Disease_Selection =="Headache" || Disease_Selection =="headache")
+    {
+        totalBill += 40.0 + tax ;  // Cost of Tab. Panadol 
+        totalBill += 35.0 + tax ;  // Cost of Tab. Disprin
+        totalBill += 30.0 + tax ;  // Cost of Tab. Calpol
+    }
+    else if (Disease_Selection =="Diarhea" || Disease_Selection =="diarhea")
+    {
+        totalBill += 120.0 + tax ;  // Cost of Tab. Flagyl 
+        totalBill += 130.0 + tax ;  // Cost of Tab. Novidat 
+        totalBill += 50.0 + tax ;        // Cost of ORS  
+    }
+    else if (Disease_Selection =="Dangue" || Disease_Selection =="dangue")
+    {
+        totalBill += 170.0 + tax ;  // Tab. Calpol  120 mg 
+        totalBill += 2000.0 + tax ;  // Tab. Tylenol 500 mg
+        totalBill += 50.0 + tax ;   // Tab. dexamethasone 4mg  
+    }
+    else if (Disease_Selection =="Nephrolotheisis" || Disease_Selection =="nephrolotheisis")
+    {
+        totalBill += 300.0 + tax ;  // Xenglomat  12.5/500mg 
+        totalBill += 150.0 + tax ;  // Tab. Neurobion 20 mg
+        totalBill += 70.0 + tax ;   // Tab. Rosobar 1p mg  
+    }
+    return totalBill;
+
+  }
+
+    //  Function chosenDoctor 
+   int calculateDoctorFee(int chosen_) 
+   {
+    int consultation_fee = 1000;
+    int TOTAL = 0, MNQ = 0, ZM = 0, MA = 0, SA = 0, FS = 0, AA = 0 , BQ = 0;
+
+   
+    if (chosen_ == 1001) 
+    {
+        MNQ = consultation_fee + 2500;
+        TOTAL += MNQ;
+    } 
+    else if (chosen_ == 2002) 
+    {
+        ZM = consultation_fee + 1500;
+        TOTAL += ZM;
+    } 
+    else if (chosen_ == 3003) 
+    {
+        MA = consultation_fee + 1000;
+        TOTAL += MA;
+    } 
+    else if (chosen_ == 4004) 
+    {
+        SA = consultation_fee + 1200;
+        TOTAL += SA;
+    } 
+    else if (chosen_ == 5005)
+     {
+        FS = consultation_fee + 1000;
+        TOTAL += FS;
+    } else if (chosen_ == 6006) 
+    {
+        AA = consultation_fee + 2000;
+        TOTAL += AA;
+    } 
+    else if (chosen_ == 7007) 
+    {
+        BQ = consultation_fee + 3500;
+        TOTAL += BQ;
+    }
+
+
+    return TOTAL;
+}
+
+      //Functions for File Handling Disease
+
+void FileDisease1()
+{ 
+      // to write
+
+    //   ofstream Prescription;
+    //   Prescription.open("D:\\Works of Univ\\hospital-management-system.txt",ios_base::app);
+    //   Prescription.close();
+
+      // to read
+      // Read and display disease prescriptions from file
+      ifstream PrescriptionReader("D:\\Works of Univ\\hospital-management-system.txt");
+     string p;
+
+    cout << "\nDisease Prescriptions:" << endl;
+    while (!PrescriptionReader.eof())
+      {
+        
+        p = PrescriptionReader.get();
+        cout << p;
+      }
+
+      PrescriptionReader.close();
+    
+    
+    
+}
+
+void FileDisease2()
+{
+
+      
+      // to write
+
+      ofstream Prescription1;
+      Prescription1.open("D:\\Works of Univ\\disease2.txt",ios_base::app);
+      Prescription1.close();
+
+      // to read
+      // Read and display disease prescriptions from file
+      ifstream PrescriptionReader1("D:\\Works of Univ\\disease2.txt");
+     string prescription1;
+
+    cout << "\nDisease Prescriptions:" << endl;
+    while (!PrescriptionReader1.eof())
+      {
+        prescription1 = PrescriptionReader1.get();
+        cout << prescription1;
+      }
+
+      PrescriptionReader1.close();
+    
+    
+}
+
+void FileDisease3()
+{
+
+      
+      // to write
+
+      ofstream Prescription2;
+      Prescription2.open("D:\\Works of Univ\\disease3.txt",ios_base::app);
+      Prescription2.close();
+
+      // to read
+      // Read and display disease prescriptions from file
+      ifstream PrescriptionReader2("D:\\Works of Univ\\disease3.txt");
+     string prescription2;
+
+    cout << "\nDisease Prescriptions:" << endl;
+    while (!PrescriptionReader2.eof())
+      {
+        prescription2 = PrescriptionReader2.get();
+        cout << prescription2;
+      }
+
+      PrescriptionReader2.close();
+
+    
+    
+}
+
+void FileDisease4()
+{
+
+      
+      // to write
+
+      ofstream Prescription3;
+      Prescription3.open("D:\\Works of Univ\\disease4.txt",ios_base::app);
+      Prescription3.close();
+
+      // to read
+      // Read and display disease prescriptions from file
+      ifstream PrescriptionReader3("D:\\Works of Univ\\disease4.txt");
+     string prescription3;
+
+    cout << "\nDisease Prescriptions:" << endl;
+
+    while (!PrescriptionReader3.eof())
+      {
+        prescription3 = PrescriptionReader3.get();
+        cout << prescription3;
+      }
+
+      PrescriptionReader3.close();
+
+    
+    
+}
+
+void FileDisease5()
+{
+   
+       
+      // to write
+
+      ofstream Prescription4;
+      Prescription4.open("D:\\Works of Univ\\disease5.txt",ios_base::app);
+      Prescription4.close();
+
+      // to read
+      // Read and display disease prescriptions from file
+      ifstream PrescriptionReader4("D:\\Works of Univ\\disease5.txt");
+     string prescription4;
+
+    cout << "\nDisease Prescriptions:" << endl;
+    while (!PrescriptionReader4.eof())
+      {
+        prescription4 = PrescriptionReader4.get();
+        cout << prescription4;
+      }
+
+      PrescriptionReader4.close();
+    
+    
+}
+
+void FileDisease6()
+{
+   
+       
+      // to write
+
+      ofstream Prescription5;
+      Prescription5.open("D:\\Works of Univ\\disease6.txt",ios_base::app);
+      Prescription5.close();
+
+      // to read
+      // Read and display disease prescriptions from file
+      ifstream PrescriptionReader5("D:\\Works of Univ\\disease6.txt");
+     string prescription5;
+
+    cout << "\nDisease Prescriptions:" << endl;
+    while (!PrescriptionReader5.eof())
+      {
+        prescription5 = PrescriptionReader5.get();
+        cout << prescription5;
+      }
+
+      PrescriptionReader5.close();
+    
+    
+}
+
+
+void FileDisease7()
+{
+   
+       
+      // to write
+
+      ofstream Prescription6;
+      Prescription6.open("D:\\Works of Univ\\disease7.txt",ios_base::app);
+      Prescription6.close();
+
+      // to read
+      // Read and display disease prescriptions from file
+      ifstream PrescriptionReader6("D:\\Works of Univ\\disease7.txt");
+     string prescription6;
+
+    cout << "\nDisease Prescriptions:" << endl;
+    while (!PrescriptionReader6.eof())
+      {
+        prescription6 = PrescriptionReader6.get();
+        cout << prescription6;
+      }
+      PrescriptionReader6.close();
+    
+    
+}
+void input_validation(string Disease_Selection) 
+{
+    while (!(Disease_Selection == "Fever" || Disease_Selection == "fever" || Disease_Selection == "Headache" || Disease_Selection == "headache" || Disease_Selection == "Diarrhea" || Disease_Selection == "diarrhea" || Disease_Selection == "Dangue" || Disease_Selection == "dangue" || Disease_Selection == "Nephrolotheisis" || Disease_Selection == "nephrolotheisis")) {
+        cout << "Invalid input. Enter Again: ";
+        cin >> Disease_Selection;
+    }
+}
+
+// Function to determine recommended ward based on disease and age
+string recommendWard(string disease, int age) 
+{
+    if (age > 0 && age <= 18) 
+    {
+        return"Child Ward";
+        cout<<endl;
+    } else if (age > 18 && age <= 59)
+     {
+        if (disease == "Flu" || disease == "fever" || disease == "Dangue" || disease == "dangue") 
+        {
+            return"Isolation Ward";
+             cout<<endl;
+        } else 
+        {
+            return"Adult Ward";
+            cout<<endl;
+        }
+    } else if (age >= 60) 
+    {
+        return"Senior Ward";
+         cout<<endl;
+    } else 
+    {
+        return "Invalid Age";
+         cout<<endl;
+    }
+}
