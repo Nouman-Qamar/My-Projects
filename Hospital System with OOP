@@ -1,0 +1,465 @@
+#include <iostream>
+#include <string>
+#include <fstream>
+#include <iomanip>
+using namespace std;
+
+class Doctor
+{
+private:
+    string name;
+    string specialty;
+    string schedule[3];
+
+public:
+    Doctor()
+    {
+        name = "";
+        specialty = "";
+        for (int i = 0; i < 3; ++i)
+        {
+            schedule[i] = "";
+        }
+    }
+    Doctor(string name_, string specialty_, const string schedule_[3]) : name(name_), specialty(specialty_)
+    {
+        for (int i = 0; i < 3; ++i)
+        {
+            schedule[i] = schedule_[i];
+        }
+    }
+
+    void displaySchedule()
+    {
+        cout << "Doctor's Schedule: " << endl;
+        for (int i = 0; i < 3; ++i)
+        {
+            cout << schedule[i] << endl;
+        }
+    }
+
+    string getName() const
+    {
+        return name;
+    }
+
+    string getSpecialty() const
+    {
+        return specialty;
+    }
+};
+
+class Hospital
+{
+public:
+    Doctor doctors[7];
+    string diseaseSelection;
+
+public:
+
+    Hospital()
+    {
+        const std::string doctorSchedules[7][3]
+            =
+        {
+            {"Monday To Friday 9AM - 5PM", "Saturday 10AM - 1PM", "Sunday OFF"},
+            {"Monday To Friday 1PM - 9PM", "Saturday 1PM - 5PM", "Sunday OFF"},
+            {"Monday To Friday 8AM - 6PM", "Saturday 10AM - 1PM", "Sunday 3PM - 5PM"},
+            {"Monday To Friday 9AM - 1PM", "Saturday 10AM - 1PM", "Sunday 7PM - 9PM"},
+            {"Monday To Friday 11AM - 4PM", "Saturday 9AM - 3PM", "Sunday 12PM - 2PM"},
+            {"Monday To Friday 12PM - 3PM", "Saturday 8AM - 12PM", "Sunday OFF"},
+            {"Monday To Friday 1PM - 12PM", "Saturday 8AM - 12PM", "Sunday OFF"}
+        };
+
+        const std::string doctorNames[7]
+            =
+        {
+            "Dr. Muhammad Nouman Qamar",
+            "Dr. Zunaira Maalik",
+            "Dr. Munazza Anwar",
+            "Dr. Safiullah Aamir",
+            "Dr. Fatima Shams",
+            "Dr. Muhammad Ahmad Asif",
+            "Dr. Batool Qutbuddin"
+        };
+
+        const std::string doctorSpecialties[7]
+            =
+        {
+            "Cardiology Specialist",
+            "Dermatologist",
+            "ENT Specialist",
+            "Pulmonologist",
+            "Orthopaedic Specialist",
+            "Psychiatrist",
+            "General Physician"
+        };
+
+        for (int i = 0; i < 7; ++i)
+        {
+            doctors[i] = Doctor(doctorNames[i], doctorSpecialties[i], doctorSchedules[i]);
+        }
+    }
+
+    void displayDoctors()
+    {
+        cout << "Faculty Doctors: " << endl;
+        for (int i = 0; i < 7; ++i)
+        {
+            cout << "ID (" << (i + 1) << ") " << doctors[i].getName() << endl;
+        }
+    }
+
+    void handlePatientInformation()
+    {
+        cout << "---------------- Patient Info -------------------" << endl;
+        string patientName, address, contactNo, bloodGroup;
+        cout << "Enter Patient's Name (up to 20 characters): ";
+        cin.ignore();
+        getline(cin, patientName);
+
+        while (patientName.length() > 20)
+        {
+            cout << "Name is too long. Please enter a name up to 20 characters: ";
+            getline(cin, patientName);
+        }
+
+        cout << "Enter Patient's Address: ";
+        getline(cin, address);
+        cout << "Enter Patient's Contact No: ";
+        getline(cin, contactNo);
+        cout << "Enter Patient's Blood Group: ";
+        cin >> bloodGroup;
+
+        ofstream patientInfoFile("patient-info.txt", ios::app);
+        if (patientInfoFile.is_open())
+        {
+            patientInfoFile << patientName << "\t" << bloodGroup << "\t" << address << "\t" << contactNo << endl;
+            patientInfoFile.close();
+        }
+        else
+        {
+            cout << "Unable to open file for patient information." << endl;
+        }
+
+        int age;
+        cout << "Enter Patient's Age: ";
+        cin >> age;
+
+        while (age <= 0 || age > 150)
+        {
+            cout << "Invalid age. Please enter a valid age: ";
+            cin >> age;
+        }
+
+        handleDiseaseSelection(age);
+    }
+
+    void handleDiseaseSelection(int age)
+    {
+        cout << "---------------- Disease Selection -------------------" << endl;
+        cout << "Enter The Disease (Cough, Flu, Fever, Headache, Diarrhea, Dengue, Nephrolithiasis): ";
+        cin >> diseaseSelection;
+
+        input_validation(diseaseSelection);
+
+        if (diseaseSelection == "Cough" || diseaseSelection == "cough")
+        {
+            FileDisease1();
+        }
+        else if (diseaseSelection == "Flu" || diseaseSelection == "flu")
+        {
+            FileDisease2();
+        }
+        else if (diseaseSelection == "Fever" || diseaseSelection == "fever")
+        {
+            FileDisease3();
+        }
+        else if (diseaseSelection == "Headache" || diseaseSelection == "headache")
+        {
+            FileDisease4();
+        }
+        else if (diseaseSelection == "Diarrhea" || diseaseSelection == "diarrhea")
+        {
+            FileDisease5();
+        }
+        else if (diseaseSelection == "Dengue" || diseaseSelection == "dengue")
+        {
+            FileDisease6();
+        }
+        else if (diseaseSelection == "Nephrolithiasis" || diseaseSelection == "nephrolithiasis")
+        {
+            FileDisease7();
+        }
+
+        string recommendedWard = recommendWard(diseaseSelection, age);
+        cout << "Recommended Ward: " << recommendedWard << endl;
+
+        char buyMedicine;
+        cout << "Do you want to buy medicine (Y/N)? ";
+        cin >> buyMedicine;
+        if (buyMedicine == 'Y' || buyMedicine == 'y') 
+        {
+            double medicineBill = calculateMedicineBill();
+            cout << "The Medicine Bill is: " << medicineBill << endl;
+        }
+
+        char admitHospital;
+        cout << "Do you want to admit in the hospital (Y/N)? ";
+        cin >> admitHospital;
+        if (admitHospital == 'Y' || admitHospital == 'y') 
+        {
+            // Add logic for admitting to the hospital
+        }
+    }
+
+    double calculateMedicineBill()
+    {
+        double totalBill = 0.0;
+        int tax = 100;
+
+        if (diseaseSelection == "Cough" || diseaseSelection == "cough")
+        {
+            totalBill += (250.0 + tax);
+            totalBill += (150.0 + tax);
+        }
+        else if (diseaseSelection == "Flu" || diseaseSelection == "flu")
+        {
+            totalBill += 30.0 + tax;
+            totalBill += 25.0 + tax;
+        }
+        else if (diseaseSelection == "Fever" || diseaseSelection == "fever")
+        {
+            totalBill += 200.0 + tax;
+            totalBill += 150.0 + tax;
+        }
+        else if (diseaseSelection == "Headache" || diseaseSelection == "headache")
+        {
+            totalBill += 40.0 + tax;
+            totalBill += 35.0 + tax;
+            totalBill += 30.0 + tax;
+        }
+        else if (diseaseSelection == "Diarrhea" || diseaseSelection == "diarrhea")
+        {
+            totalBill += 120.0 + tax;
+            totalBill += 130.0 + tax;
+            totalBill += 50.0 + tax;
+        }
+        else if (diseaseSelection == "Dengue" || diseaseSelection == "dengue")
+        {
+            totalBill += 170.0 + tax;
+            totalBill += 2000.0 + tax;
+            totalBill += 50.0 + tax;
+        }
+        else if (diseaseSelection == "Nephrolithiasis" || diseaseSelection == "nephrolithiasis")
+        {
+            totalBill += 300.0 + tax;
+            totalBill += 150.0 + tax;
+            totalBill += 70.0 + tax;
+        }
+        return totalBill;
+    }
+
+    int calculateDoctorFee(int chosen_)
+    {
+        int consultationFee = 1000;
+        int doctorFee = 0;
+        if (chosen_ >= 1 && chosen_ <= 7)
+        {
+            doctorFee = consultationFee + (chosen_ * 500);
+        }
+        return doctorFee;
+    }
+
+    string recommendWard(string disease, int age)
+    {
+        if (age > 0 && age <= 18)
+        {
+            return "Child Ward";
+        }
+        else if (age > 18 && age <= 59)
+        {
+            if (disease == "Flu" || disease == "Fever" || disease == "Dengue")
+            {
+                return "Isolation Ward";
+            }
+            else {
+                return "Adult Ward";
+            }
+        }
+        else if (age >= 60)
+        {
+            return "Senior Ward";
+        }
+        else {
+            return "Invalid Age";
+        }
+    }
+
+    void FileDisease1()
+    {
+        ifstream PrescriptionReader("D:\\UMT Work\\hospital-management-system.txt");
+        string p;
+
+        cout << "\nDisease Prescriptions:" << endl;
+      while (!PrescriptionReader.eof())
+      {
+        
+        p = PrescriptionReader.get();
+        cout << p;
+      }
+
+      PrescriptionReader.close();
+    }
+
+    void FileDisease2()
+    {
+        ifstream PrescriptionReader1("D:\\UMT Work\\disease2.txt");
+        string prescription1;
+
+        cout << "\nDisease Prescriptions:" << endl;
+       while (!PrescriptionReader1.eof())
+      {
+        prescription1 = PrescriptionReader1.get();
+        cout << prescription1;
+      }
+
+      PrescriptionReader1.close();
+    }
+
+    void FileDisease3()
+    {
+        ifstream PrescriptionReader2("D:\\UMT Work\\disease3.txt");
+        string prescription2;
+
+        cout << "\nDisease Prescriptions:" << endl;
+       while (!PrescriptionReader2.eof())
+      {
+        prescription2 = PrescriptionReader2.get();
+        cout << prescription2;
+      }
+
+      PrescriptionReader2.close();
+
+    }
+
+    void FileDisease4()
+    {
+        ifstream PrescriptionReader3("D:\\UMT Work\\disease4.txt");
+        string prescription3;
+
+        cout << "\nDisease Prescriptions:" << endl;
+        while (!PrescriptionReader3.eof())
+      {
+        prescription3 = PrescriptionReader3.get();
+        cout << prescription3;
+      }
+
+      PrescriptionReader3.close();
+    }
+
+    void FileDisease5()
+    {
+        ifstream PrescriptionReader4("D:\\UMT Work\\disease5.txt");
+        string prescription4;
+
+        cout << "\nDisease Prescriptions:" << endl;
+        while (!PrescriptionReader4.eof())
+      {
+        prescription4 = PrescriptionReader4.get();
+        cout << prescription4;
+      }
+
+      PrescriptionReader4.close();
+    }
+
+    void FileDisease6()
+    {
+        ifstream PrescriptionReader5("D:\\UMT Work\\disease6.txt");
+        string prescription5;
+
+        cout << "\nDisease Prescriptions:" << endl;
+      while (!PrescriptionReader5.eof())
+      {
+        prescription5 = PrescriptionReader5.get();
+        cout << prescription5;
+      }
+
+      PrescriptionReader5.close();
+    }
+
+    void FileDisease7()
+    {
+        ifstream PrescriptionReader6("D:\\UMT Work\\disease7.txt");
+        string prescription6;
+
+        cout << "\nDisease Prescriptions:" << endl;
+       while (!PrescriptionReader6.eof())
+      {
+        prescription6 = PrescriptionReader6.get();
+        cout << prescription6;
+      }
+      PrescriptionReader6.close();
+    
+    }
+
+    void input_validation(string& Disease_Selection)
+    {
+        while (!(Disease_Selection == "Fever" || Disease_Selection == "fever" || Disease_Selection == "Headache" || Disease_Selection == "headache" || Disease_Selection == "Diarrhea" || Disease_Selection == "diarrhea" || Disease_Selection == "Dengue" || Disease_Selection == "dengue" || Disease_Selection == "Nephrolithiasis" || Disease_Selection == "nephrolithiasis")) {
+            cout << "Invalid input. Enter Again: ";
+            cin >> Disease_Selection;
+        }
+    }
+};
+
+int main()
+{
+    system("color 70");
+    Hospital hospital;
+
+    bool repeat = true;
+    while (repeat) 
+    {
+        cout << "==============================================================================" << endl;
+        cout << "                        CELESTIAL HEALTH HAVEN                                " << endl;
+        cout << "==============================================================================" << endl;
+
+        int choose;
+        cout << "                   Faculty Doctor's                               " << endl;
+        hospital.displayDoctors();
+        cout << endl;
+        cout << "Please Choose Your Doctor: ";
+        cin >> choose;
+        cout << endl;
+
+        while (choose < 1 || choose > 7)
+        {
+            cout << "Invalid choice! Please enter a number between 1 and 7: ";
+            cin >> choose;
+        }
+
+        cout << "Doctor's Name: " << hospital.doctors[choose - 1].getName() << endl;
+        cout << "Specialty: " << hospital.doctors[choose - 1].getSpecialty() << endl;
+        cout << "Schedule: " << endl;
+        hospital.doctors[choose - 1].displaySchedule();
+
+        hospital.handlePatientInformation();
+
+        double medicineBill = hospital.calculateMedicineBill();
+        cout << "The Medicine Bill is: " << medicineBill << endl;
+
+        int doctorFee = hospital.calculateDoctorFee(choose);
+        cout << "The Bill for the Doctor: " << doctorFee << endl;
+
+        double totalBill = medicineBill + doctorFee;
+        cout << "The Total Bill for Patient is: " << totalBill << endl;
+
+        int c;
+        cout << "Enter 0 to clear....";
+        cin >> c;
+
+        system("cls");
+    }
+
+    return 0;
+}
